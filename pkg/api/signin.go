@@ -6,13 +6,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func signInHandler(w http.ResponseWriter, r *http.Request) {
+func signInHandler(w http.ResponseWriter, r *http.Request, pass string) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
 		writeJson(w, http.StatusMethodNotAllowed, map[string]string{"error": "Метод не поддерживается"})
@@ -28,8 +27,6 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 		writeJson(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
-
-	pass := os.Getenv("TODO_PASSWORD")
 
 	if data.Password != pass {
 		writeJson(w, http.StatusUnauthorized, map[string]string{"error": "Неверный пароль"})

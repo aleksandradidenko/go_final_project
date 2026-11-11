@@ -4,15 +4,13 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func auth(next http.HandlerFunc) http.HandlerFunc {
+func auth(next http.HandlerFunc, pass string) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// смотрим наличие пароля
-		pass := os.Getenv("TODO_PASSWORD")
 		if len(pass) > 0 {
 			var tokenString string
 

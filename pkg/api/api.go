@@ -8,12 +8,14 @@ import (
 	"strconv"
 )
 
-func Init() {
+func Init(password string) {
 	http.HandleFunc("/api/nextdate", nextDayHandler)
-	http.HandleFunc("/api/task", auth(taskHandler))
-	http.HandleFunc("/api/tasks", auth(tasksHandler))
-	http.HandleFunc("/api/task/done", auth(doneTaskHandler))
-	http.HandleFunc("/api/signin", signInHandler)
+	http.HandleFunc("/api/task", auth(taskHandler, password))
+	http.HandleFunc("/api/tasks", auth(tasksHandler, password))
+	http.HandleFunc("/api/task/done", auth(doneTaskHandler, password))
+	http.HandleFunc("/api/signin", func(w http.ResponseWriter, r *http.Request) {
+		signInHandler(w, r, password)
+	})
 }
 
 func taskHandler(w http.ResponseWriter, r *http.Request) {

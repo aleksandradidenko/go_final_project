@@ -16,7 +16,7 @@ CREATE TABLE scheduler (
 	repeat VARCHAR(128) NOT NULL DEFAULT ""
 );
 
-CREATE INDEX idx_scheduler_daa ON scheduler(date);
+CREATE INDEX idx_scheduler_date ON scheduler(date);
 `
 
 var db *sql.DB
@@ -43,4 +43,8 @@ func Init(dbFile string) error {
 	}
 
 	return nil
+}
+
+func Close() error {
+	return db.Close()
 }

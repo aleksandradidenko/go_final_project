@@ -1,21 +1,38 @@
 package server
 
 import (
+	"context"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/aleksandradidenko/go_final_project/pkg/api"
 )
 
-func Run() error {
-	port := os.Getenv("TODO_PORT")
-	if port == "" {
-		port = "7540"
-	}
+const shutdownTimeout = 5 * time.Second
 
-	api.Init()
-
+func Run(port, password string) error {
+	api.Init(password)
 	http.Handle("/", http.FileServer(http.Dir("web")))
 
-	return http.ListenAndServe(":"+port, nil)
+	server := &http.Server{Addr: ":" + port}
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	serverErr := make(chan error, 1)
+	go func() {
+		serverErr <- server.ListenAndServe()
+	}()
+
+	select {
+	case err := <-serverErr:
+		return err
+	case <-ctx.Done():
+		stop()
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+		defer cancel()
+		return server.Shutdown(shutdownCtx)
+	}
 }
