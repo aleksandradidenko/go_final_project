@@ -48,8 +48,9 @@ func checkDate(task *db.Task) error {
 }
 
 // Отправка ответа в формате JSON
-func writeJson(w http.ResponseWriter, data any) {
+func writeJson(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(data)
 }
 
@@ -59,29 +60,29 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
-		writeJson(w, map[string]string{"error": err.Error()})
+		writeJson(w, http.StatusOK, map[string]string{"error": err.Error()})
 		return
 	}
 
 	if task.Title == "" {
-		writeJson(w, map[string]string{
+		writeJson(w, http.StatusOK, map[string]string{
 			"error": "Не указан заголовок задачи",
 		})
 		return
 	}
 
 	if err := checkDate(&task); err != nil {
-		writeJson(w, map[string]string{"error": err.Error()})
+		writeJson(w, http.StatusOK, map[string]string{"error": err.Error()})
 		return
 	}
 
 	id, err := db.AddTask(&task)
 	if err != nil {
-		writeJson(w, map[string]string{"error": err.Error()})
+		writeJson(w, http.StatusOK, map[string]string{"error": err.Error()})
 		return
 	}
 
-	writeJson(w, map[string]string{
+	writeJson(w, http.StatusOK, map[string]string{
 		"id": strconv.FormatInt(id, 10),
 	})
 }

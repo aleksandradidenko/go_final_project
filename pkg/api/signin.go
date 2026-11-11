@@ -14,9 +14,7 @@ import (
 func signInHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		writeJson(w, map[string]string{"error": "Метод не поддерживается"})
+		writeJson(w, http.StatusMethodNotAllowed, map[string]string{"error": "Метод не поддерживается"})
 		return
 	}
 
@@ -26,14 +24,14 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		writeJson(w, map[string]string{"error": err.Error()})
+		writeJson(w, http.StatusOK, map[string]string{"error": err.Error()})
 		return
 	}
 
 	pass := os.Getenv("TODO_PASSWORD")
 
 	if data.Password != pass {
-		writeJson(w, map[string]string{"error": "Неверный пароль"})
+		writeJson(w, http.StatusOK, map[string]string{"error": "Неверный пароль"})
 		return
 	}
 
@@ -46,9 +44,9 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 
 	signedToken, err := token.SignedString([]byte(pass))
 	if err != nil {
-		writeJson(w, map[string]string{"error": err.Error()})
+		writeJson(w, http.StatusOK, map[string]string{"error": err.Error()})
 		return
 	}
 
-	writeJson(w, map[string]string{"token": signedToken})
+	writeJson(w, http.StatusOK, map[string]string{"token": signedToken})
 }

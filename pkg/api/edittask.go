@@ -12,29 +12,29 @@ func editTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
-		writeJson(w, map[string]string{"error": err.Error()})
+		writeJson(w, http.StatusOK, map[string]string{"error": err.Error()})
 		return
 	}
 
 	if task.ID == "" {
-		writeJson(w, map[string]string{"error": "Не указан идентификатор задачи"})
+		writeJson(w, http.StatusOK, map[string]string{"error": "Не указан идентификатор задачи"})
 		return
 	}
 
 	if task.Title == "" {
-		writeJson(w, map[string]string{"error": "Не указан заголовок задачи"})
+		writeJson(w, http.StatusOK, map[string]string{"error": "Не указан заголовок задачи"})
 		return
 	}
 
 	if err := checkDate(&task); err != nil {
-		writeJson(w, map[string]string{"error": err.Error()})
+		writeJson(w, http.StatusOK, map[string]string{"error": err.Error()})
 		return
 	}
 
 	if err := db.UpdateTask(&task); err != nil {
-		writeJson(w, map[string]string{"error": err.Error()})
+		writeJson(w, http.StatusOK, map[string]string{"error": err.Error()})
 		return
 	}
 
-	writeJson(w, map[string]string{})
+	writeJson(w, http.StatusOK, map[string]string{})
 }

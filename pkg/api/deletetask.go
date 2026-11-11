@@ -10,7 +10,7 @@ func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("id")
 
 	if id == "" {
-		writeJson(w, map[string]string{
+		writeJson(w, http.StatusOK, map[string]string{
 			"error": "Не указан идентификатор задачи",
 		})
 		return
@@ -18,11 +18,11 @@ func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := db.DeleteTask(id)
 	if err != nil {
-		writeJson(w, map[string]string{
+		writeJson(w, http.StatusOK, map[string]string{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	writeJson(w, map[string]string{})
+	writeJson(w, http.StatusOK, map[string]string{})
 }

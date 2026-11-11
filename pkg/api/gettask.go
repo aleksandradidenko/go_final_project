@@ -10,7 +10,7 @@ func getTaskHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("id")
 
 	if id == "" {
-		writeJson(w, map[string]string{
+		writeJson(w, http.StatusOK, map[string]string{
 			"error": "Не указан идентификатор задачи",
 		})
 		return
@@ -18,11 +18,11 @@ func getTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	task, err := db.GetTask(id)
 	if err != nil {
-		writeJson(w, map[string]string{
+		writeJson(w, http.StatusOK, map[string]string{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	writeJson(w, task)
+	writeJson(w, http.StatusOK, task)
 }
