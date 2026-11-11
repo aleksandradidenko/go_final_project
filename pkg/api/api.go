@@ -1,6 +1,12 @@
 package api
 
-import "net/http"
+import (
+	"database/sql"
+	"errors"
+	"log"
+	"net/http"
+	"strconv"
+)
 
 func Init() {
 	http.HandleFunc("/api/nextdate", nextDayHandler)
@@ -24,4 +30,25 @@ func taskHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Allow", "GET, POST, PUT, DELETE")
 		writeJson(w, http.StatusMethodNotAllowed, map[string]string{"error": "Метод не поддерживается"})
 	}
+}
+
+func validateTaskID(id string) error {
+	if id == "" {
+		return errors.New("Не указан идентификатор задачи")
+	}
+	number, err := strconv.ParseInt(id, 10, 64)
+	if err != nil || number <= 0 {
+		return errors.New("Неверный идентификатор задачи")
+	}
+	return nil
+}
+
+func writeDatabaseError(w http.ResponseWriter, err error) {
+	if errors.Is(err, sql.ErrNoRows) {
+		writeJson(w, http.StatusNotFound, map[string]string{"error": "Задача не найдена"})
+		return
+	}
+
+	log.Printf("Ошибка работы с базой данных: %v", err)
+	writeJson(w, http.StatusInternalServerError, map[string]string{"error": "Ошибка работы с базой данных"})
 }

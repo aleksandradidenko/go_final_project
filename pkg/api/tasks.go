@@ -6,6 +6,8 @@ import (
 	"github.com/aleksandradidenko/go_final_project/pkg/db"
 )
 
+const tasksLimit = 50
+
 type TasksResp struct {
 	Tasks []*db.Task `json:"tasks"`
 }
@@ -19,11 +21,9 @@ func tasksHandler(w http.ResponseWriter, r *http.Request) {
 
 	search := r.FormValue("search")
 
-	tasks, err := db.Tasks(50, search)
+	tasks, err := db.Tasks(tasksLimit, search)
 	if err != nil {
-		writeJson(w, http.StatusOK, map[string]string{
-			"error": err.Error(),
-		})
+		writeDatabaseError(w, err)
 		return
 	}
 

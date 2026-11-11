@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
 )
 
@@ -136,7 +135,7 @@ func UpdateTask(task *Task) error {
 	}
 
 	if count == 0 {
-		return fmt.Errorf("задача не найдена")
+		return sql.ErrNoRows
 	}
 
 	return nil
@@ -157,7 +156,7 @@ func UpdateDate(id string, date string) error {
 	}
 
 	if count == 0 {
-		return fmt.Errorf("задача не найдена")
+		return sql.ErrNoRows
 	}
 
 	return nil
@@ -177,7 +176,7 @@ func DeleteTask(id string) error {
 	}
 
 	if count == 0 {
-		return fmt.Errorf("задача не найдена")
+		return sql.ErrNoRows
 	}
 
 	return nil

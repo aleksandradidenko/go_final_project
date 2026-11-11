@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 	"time"
 
@@ -15,16 +16,14 @@ func doneTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := r.FormValue("id")
-	if id == "" {
-		writeJson(w, http.StatusOK, map[string]string{
-			"error": "Не указан идентификатор задачи",
-		})
+	if err := validateTaskID(id); err != nil {
+		writeJson(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
 
 	task, err := db.GetTask(id)
 	if err != nil {
-		writeJson(w, http.StatusOK, map[string]string{"error": err.Error()})
+		writeDatabaseError(w, err)
 		return
 	}
 
@@ -33,7 +32,8 @@ func doneTaskHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		next, nextErr := NextDate(time.Now(), task.Date, task.Repeat)
 		if nextErr != nil {
-			writeJson(w, http.StatusOK, map[string]string{"error": nextErr.Error()})
+			log.Printf("Ошибка расчёта следующей даты задачи %s: %v", id, nextErr)
+			writeJson(w, http.StatusInternalServerError, map[string]string{"error": "Не удалось рассчитать следующую дату"})
 			return
 		}
 
@@ -41,7 +41,7 @@ func doneTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		writeJson(w, http.StatusOK, map[string]string{"error": err.Error()})
+		writeDatabaseError(w, err)
 		return
 	}
 

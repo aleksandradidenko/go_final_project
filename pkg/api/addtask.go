@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -51,7 +52,9 @@ func checkDate(task *db.Task) error {
 func writeJson(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(data)
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		log.Printf("Ошибка записи JSON-ответа: %v", err)
+	}
 }
 
 // Обработчик добавления задачи
@@ -60,25 +63,25 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
-		writeJson(w, http.StatusOK, map[string]string{"error": err.Error()})
+		writeJson(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
 
 	if task.Title == "" {
-		writeJson(w, http.StatusOK, map[string]string{
+		writeJson(w, http.StatusBadRequest, map[string]string{
 			"error": "Не указан заголовок задачи",
 		})
 		return
 	}
 
 	if err := checkDate(&task); err != nil {
-		writeJson(w, http.StatusOK, map[string]string{"error": err.Error()})
+		writeJson(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
 
 	id, err := db.AddTask(&task)
 	if err != nil {
-		writeJson(w, http.StatusOK, map[string]string{"error": err.Error()})
+		writeDatabaseError(w, err)
 		return
 	}
 
