@@ -12,6 +12,14 @@ import (
 )
 
 func signInHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.Header().Set("Allow", http.MethodPost)
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		writeJson(w, map[string]string{"error": "Метод не поддерживается"})
+		return
+	}
+
 	var data struct {
 		Password string `json:"password"`
 	}
