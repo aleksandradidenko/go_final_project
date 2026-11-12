@@ -77,33 +77,22 @@ TODO_PORT=17540 TODO_DBFILE=/tmp/go-final-project-review.db go test -count=1 ./t
 
 ## Docker
 
-Для сборки образа на Mac с процессором Apple Silicon сначала скомпилируйте приложение для Linux ARM64:
-
-```bash
-CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o scheduler .
-```
-
-Соберите Docker-образ:
+Из корневой директории проекта соберите Docker-образ. Docker сам компилирует приложение из исходников.
 
 ```bash
 docker build -t go-scheduler:latest .
 ```
 
-Запустите контейнер с подключением существующей SQLite-базы с компьютера:
+Создайте каталог для SQLite на компьютере и подключите его к контейнеру.
 
 ```bash
+mkdir -p data
 docker run --rm --name go-scheduler \
   -p 7541:7540 \
-  -v "$(pwd)/scheduler.db:/data/scheduler.db" \
+  -v "$(pwd)/data:/data" \
   go-scheduler:latest
 ```
 
-Перед запуском контейнера файл `scheduler.db` должен существовать. Его можно создать предварительным запуском приложения через `go run .`.
-
-После запуска планировщик доступен по адресу:
-
-http://localhost:7541
+Откройте [http://localhost:7541](http://localhost:7541). При первом запуске приложение создаст файл `data/scheduler.db` на компьютере. Задачи сохранятся при перезапуске контейнера.
 
 При необходимости пароль можно передать контейнеру через параметр `-e TODO_PASSWORD=...`.
-
-Контейнер использует базу данных с компьютера, поэтому изменения задач сохраняются в файле `scheduler.db` на хосте.
